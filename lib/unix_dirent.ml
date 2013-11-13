@@ -21,15 +21,15 @@ module File_kind = struct
   external dt_wht     : unit -> int = "unix_dirent_dt_wht"     "noalloc"
 
   type defns = {
-    dt_unknown : int option;
-    dt_fifo    : int option;
-    dt_chr     : int option;
-    dt_dir     : int option;
-    dt_blk     : int option;
-    dt_reg     : int option;
-    dt_lnk     : int option;
-    dt_sock    : int option;
-    dt_wht     : int option;
+    dt_unknown : int;
+    dt_fifo    : int;
+    dt_chr     : int;
+    dt_dir     : int;
+    dt_blk     : int;
+    dt_reg     : int;
+    dt_lnk     : int;
+    dt_sock    : int;
+    dt_wht     : int;
   }
 
   type index = (int, t) Hashtbl.t
@@ -51,38 +51,28 @@ module File_kind = struct
     let open Unix in
     let open Hashtbl in
     let h = create 10 in
-    (match defns.dt_unknown with
-    | Some x -> replace h x DT_UNKNOWN | None -> ());
-    (match defns.dt_fifo with
-    | Some x -> replace h x DT_FIFO    | None -> ());
-    (match defns.dt_chr with
-    | Some x -> replace h x DT_CHR     | None -> ());
-    (match defns.dt_dir with
-    | Some x -> replace h x DT_DIR     | None -> ());
-    (match defns.dt_blk with
-    | Some x -> replace h x DT_BLK     | None -> ());
-    (match defns.dt_reg with
-    | Some x -> replace h x DT_REG     | None -> ());
-    (match defns.dt_lnk with
-    | Some x -> replace h x DT_LNK     | None -> ());
-    (match defns.dt_sock with
-    | Some x -> replace h x DT_SOCK    | None -> ());
-    (match defns.dt_wht with
-    | Some x -> replace h x DT_WHT     | None -> ());
+    replace h defns.dt_unknown DT_UNKNOWN;
+    replace h defns.dt_fifo    DT_FIFO;
+    replace h defns.dt_chr     DT_CHR;
+    replace h defns.dt_dir     DT_DIR;
+    replace h defns.dt_blk     DT_BLK;
+    replace h defns.dt_reg     DT_REG;
+    replace h defns.dt_lnk     DT_LNK;
+    replace h defns.dt_sock    DT_SOCK;
+    replace h defns.dt_wht     DT_WHT;
     h
 
   let host =
-    let option f = match f () with -1 -> None | x -> Some x in
     let defns = {
-      dt_unknown = option dt_unknown;
-      dt_fifo    = option dt_fifo;
-      dt_chr     = option dt_chr;
-      dt_dir     = option dt_dir;
-      dt_blk     = option dt_blk;
-      dt_reg     = option dt_reg;
-      dt_lnk     = option dt_lnk;
-      dt_sock    = option dt_sock;
-      dt_wht     = option dt_wht;
+      dt_unknown = dt_unknown ();
+      dt_fifo    = dt_fifo ();
+      dt_chr     = dt_chr ();
+      dt_dir     = dt_dir ();
+      dt_blk     = dt_blk ();
+      dt_reg     = dt_reg ();
+      dt_lnk     = dt_lnk ();
+      dt_sock    = dt_sock ();
+      dt_wht     = dt_wht ();
     } in
     let index = index_of_defns defns in
     (defns,index)
