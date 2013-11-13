@@ -1,0 +1,6 @@
+version = "0.1"
+description = "Host-dependent UNIX dirent.h access"
+requires = "unix"
+archive(byte) = "unix_dirent.cma"
+archive(native) = "unix_dirent.cmxa"
+exists_if = "unix_dirent.cma"
