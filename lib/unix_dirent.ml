@@ -35,6 +35,16 @@ module File_kind = struct
   type index = (int, t) Hashtbl.t
   type host = defns * index
 
+  let of_file_kind = Unix.(function
+    | S_REG  -> DT_REG
+    | S_DIR  -> DT_DIR
+    | S_CHR  -> DT_CHR
+    | S_BLK  -> DT_BLK
+    | S_LNK  -> DT_LNK
+    | S_FIFO -> DT_FIFO
+    | S_SOCK -> DT_SOCK
+  )
+
   let to_code ~host = let (defns,_) = host in Unix.(function
     | DT_UNKNOWN -> defns.dt_unknown
     | DT_FIFO    -> defns.dt_fifo

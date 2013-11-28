@@ -14,6 +14,8 @@ module File_kind : sig
 
   val host : host
 
+  val of_file_kind : Unix.file_kind -> t
+
   val to_code : host:host -> t -> int
   val of_code : host:host -> int -> t option
 end
