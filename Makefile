@@ -4,16 +4,49 @@ FINDLIB_NAME=unix-dirent
 MOD_NAME=unix_dirent
 BUILD=_build/lib
 
-build:
-	mkdir -p $(BUILD)
-	cc -c -o $(BUILD)/$(MOD_NAME)_stubs.o lib/$(MOD_NAME)_stubs.c -I$(shell ocamlc -where)
-	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME).cmi -c lib/$(MOD_NAME).mli
-	ocamlfind ocamlmklib -o $(BUILD)/$(MOD_NAME) -I $(BUILD) \
-		lib/$(MOD_NAME).ml $(BUILD)/$(MOD_NAME)_stubs.o
+BIND_UNIX := 1
 
-install:
+ifeq ($(BIND_UNIX),0)
+SRC=lib/no_unix
+FLAGS=
+EXTRA_META=requires = \"\"
+CSRCS=
+OBJS=
+else
+SRC=lib/unix
+FLAGS=-package ctypes.foreign
+EXTRA_META=requires = \"unix ctypes.foreign\"
+CSRCS=$(SRC)/$(MOD_NAME)_stubs.c
+OBJS=$(BUILD)/unix/$(MOD_NAME)_stubs.o
+endif
+
+CFLAGS=-fPIC -Wall -Wextra -Werror -std=c99
+
+build: $(BUILD) $(OBJS)
+	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME)_private.cmi \
+		-c lib/$(MOD_NAME)_private.ml
+	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME)_common.cmi \
+		-c lib/$(MOD_NAME)_common.mli
+	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME).cmi -I $(BUILD) -I lib \
+		$(FLAGS) -c $(SRC)/$(MOD_NAME).mli
+	ocamlfind ocamlmklib -o $(BUILD)/$(MOD_NAME) -I $(BUILD) \
+		$(FLAGS) lib/$(MOD_NAME)_private.ml lib/$(MOD_NAME)_common.ml \
+		$(SRC)/$(MOD_NAME).ml $(OBJS)
+
+$(BUILD):
+	mkdir -p $(BUILD)
+
+$(BUILD)/unix/$(MOD_NAME)_stubs.o: $(SRC)/$(MOD_NAME)_stubs.c $(BUILD)
+	mkdir -p $(BUILD)/unix
+	cc -c $(CFLAGS) -o $@ $< -I$(shell ocamlc -where)
+
+META: META.in
+	cp META.in META
+	echo $(EXTRA_META) >> META
+
+install: META
 	ocamlfind install $(FINDLIB_NAME) META \
-		lib/$(MOD_NAME).mli \
+		$(SRC)/$(MOD_NAME).mli \
 		$(BUILD)/$(MOD_NAME).cmi \
 		$(BUILD)/$(MOD_NAME).cma \
 		$(BUILD)/$(MOD_NAME).cmxa \
@@ -27,4 +60,5 @@ reinstall: uninstall install
 
 clean:
 	rm -rf _build
-	rm -f lib/$(MOD_NAME).cm? lib/$(MOD_NAME).o
+	bash -c "rm -f lib/$(MOD_NAME)_{common,private}.{cm?,o} META"
+	bash -c "rm -f lib/{unix,no_unix}/$(MOD_NAME).{cm?,o}"

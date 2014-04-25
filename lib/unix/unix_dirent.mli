@@ -16,24 +16,22 @@
  *)
 
 module File_kind : sig
-  type t =
-  | DT_UNKNOWN
-  | DT_FIFO
-  | DT_CHR
-  | DT_DIR
-  | DT_BLK
-  | DT_REG
-  | DT_LNK
-  | DT_SOCK
-  | DT_WHT
-
-  type host
+  include module type of Unix_dirent_common.File_kind
 
   val host : host
 
   val of_file_kind : Unix.file_kind -> t
-
-  val to_code : host:host -> t -> int
-  val of_code : host:host -> int -> t option
 end
 
+module Dirent : sig
+  type t
+end
+
+type dir_handle
+val dir_handle : dir_handle Ctypes.typ
+
+val opendir : string -> dir_handle
+
+val readdir : dir_handle -> Dirent.t Ctypes.structure
+
+val closedir : dir_handle -> unit
