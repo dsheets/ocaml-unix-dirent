@@ -54,6 +54,13 @@ module File_kind = struct
   )
 end
 
+type host = {
+  file_kind : File_kind.host;
+}
+let host = {
+  file_kind = File_kind.host;
+}
+
 open Ctypes
 open Foreign
 open Unsigned

@@ -27,6 +27,11 @@ module Dirent : sig
   type t
 end
 
+type host = {
+  file_kind : File_kind.host;
+}
+val host : host
+
 type dir_handle
 val dir_handle : dir_handle Ctypes.typ
 

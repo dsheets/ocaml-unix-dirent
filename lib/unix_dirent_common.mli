@@ -33,3 +33,6 @@ module File_kind : sig
   val of_code : host:host -> int -> t option
 end
 
+type host = {
+  file_kind : File_kind.host;
+}

@@ -74,3 +74,7 @@ module File_kind = struct
     try Some (Hashtbl.find index code)
     with Not_found -> None
 end
+
+type host = {
+  file_kind : File_kind.host;
+}
