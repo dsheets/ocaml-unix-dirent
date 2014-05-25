@@ -21,10 +21,16 @@ module File_kind : sig
   val host : host
 
   val of_file_kind : Unix.file_kind -> t
+  val to_file_kind : t -> Unix.file_kind option
 end
 
 module Dirent : sig
-  type t
+  type t = {
+    ino  : int64;
+    off  : int64;
+    kind : File_kind.t;
+    name : string;
+  }
 end
 
 type host = {
@@ -35,11 +41,11 @@ val host : host
 val sexp_of_host : host -> Sexplib.Sexp.t
 val host_of_sexp : Sexplib.Sexp.t -> host
 
-type dir_handle
+type dir_handle = Unix.dir_handle
 val dir_handle : dir_handle Ctypes.typ
 
 val opendir : string -> dir_handle
 
-val readdir : dir_handle -> Dirent.t Ctypes.structure
+val readdir : dir_handle -> Dirent.t
 
 val closedir : dir_handle -> unit

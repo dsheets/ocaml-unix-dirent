@@ -52,6 +52,17 @@ module File_kind = struct
     | S_FIFO -> DT_FIFO
     | S_SOCK -> DT_SOCK
   )
+
+  let to_file_kind = Unix.(function
+    | DT_REG  -> Some S_REG
+    | DT_DIR  -> Some S_DIR
+    | DT_CHR  -> Some S_CHR
+    | DT_BLK  -> Some S_BLK
+    | DT_LNK  -> Some S_LNK
+    | DT_FIFO -> Some S_FIFO
+    | DT_SOCK -> Some S_SOCK
+    | DT_WHT | DT_UNKNOWN -> None
+  )
 end
 
 type host = {
@@ -69,19 +80,39 @@ open Unsigned
 open PosixTypes
 
 module Dirent = struct
-  type t
+  type t = {
+    ino  : int64;
+    off  : int64;
+    kind : File_kind.t;
+    name : string;
+  }
+
   let t : t structure typ = structure "Dirent"
   let ( -: ) s x = field t s x
   let ino    = "ino"    -: ino_t
   let off    = "off"    -: off_t
   let reclen = "reclen" -: ushort
-  let type_  = "type"   -: uchar
+  let type_  = "type"   -: File_kind.(t ~host)
   let name   = "name"   -: array 0 char
   let () = seal t
 end
 
-type dir_handle = unit ptr
-let dir_handle : dir_handle typ = ptr void
+type dir_handle = Unix.dir_handle
+(* TODO: review *)
+let dir_handle = Ctypes.(
+  view
+    ~read:(fun ptr ->
+      let addr = raw_address_of_ptr ptr in
+      let dh = Obj.(new_block abstract_tag 1) in
+      Obj.(set_field dh 0 (field (repr addr) 1));
+      (Obj.obj dh : dir_handle)
+    )
+    ~write:(fun dir ->
+      let addr = 0L in
+      Obj.(set_field (repr addr) 1 (field (repr dir) 0));
+      ptr_of_raw_address addr
+    )
+    (ptr void))
 
 let local ?check_errno addr typ =
   coerce (ptr void) (funptr ?check_errno typ) (ptr_of_raw_address addr)
@@ -104,7 +135,12 @@ let readdir =
   in
   fun dirh ->
     try (match c dirh with
-    | Some ent -> !@ (allocate Dirent.t (!@ ent))
+    | Some t -> let ent = !@ t in Ctypes.(Dirent.({
+      ino  = UInt64.to_int64 (coerce ino_t uint64_t (getf ent ino));
+      off  = coerce off_t int64_t (getf ent off);
+      kind = getf ent type_;
+      name = coerce (ptr char) string (CArray.start (getf ent name));
+    }))
     | None -> raise End_of_file
     ) with Unix.Unix_error(e,_,_) -> raise (Unix.Unix_error (e,"readdir",""))
 
