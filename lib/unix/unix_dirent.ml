@@ -18,15 +18,15 @@
 module File_kind = struct
   include Unix_dirent_private.File_kind
 
-  external dt_unknown : unit -> int = "unix_dirent_dt_unknown" "noalloc"
-  external dt_fifo    : unit -> int = "unix_dirent_dt_fifo"    "noalloc"
-  external dt_chr     : unit -> int = "unix_dirent_dt_chr"     "noalloc"
-  external dt_dir     : unit -> int = "unix_dirent_dt_dir"     "noalloc"
-  external dt_blk     : unit -> int = "unix_dirent_dt_blk"     "noalloc"
-  external dt_reg     : unit -> int = "unix_dirent_dt_reg"     "noalloc"
-  external dt_lnk     : unit -> int = "unix_dirent_dt_lnk"     "noalloc"
-  external dt_sock    : unit -> int = "unix_dirent_dt_sock"    "noalloc"
-  external dt_wht     : unit -> int = "unix_dirent_dt_wht"     "noalloc"
+  external dt_unknown : unit -> char = "unix_dirent_dt_unknown" "noalloc"
+  external dt_fifo    : unit -> char = "unix_dirent_dt_fifo"    "noalloc"
+  external dt_chr     : unit -> char = "unix_dirent_dt_chr"     "noalloc"
+  external dt_dir     : unit -> char = "unix_dirent_dt_dir"     "noalloc"
+  external dt_blk     : unit -> char = "unix_dirent_dt_blk"     "noalloc"
+  external dt_reg     : unit -> char = "unix_dirent_dt_reg"     "noalloc"
+  external dt_lnk     : unit -> char = "unix_dirent_dt_lnk"     "noalloc"
+  external dt_sock    : unit -> char = "unix_dirent_dt_sock"    "noalloc"
+  external dt_wht     : unit -> char = "unix_dirent_dt_wht"     "noalloc"
 
   let host =
     let defns = {
@@ -56,10 +56,12 @@ end
 
 type host = {
   file_kind : File_kind.host;
-}
+} with sexp
+
 let host = {
   file_kind = File_kind.host;
 }
+
 
 open Ctypes
 open Foreign

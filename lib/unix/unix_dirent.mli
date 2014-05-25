@@ -32,6 +32,9 @@ type host = {
 }
 val host : host
 
+val sexp_of_host : host -> Sexplib.Sexp.t
+val host_of_sexp : Sexplib.Sexp.t -> host
+
 type dir_handle
 val dir_handle : dir_handle Ctypes.typ
 

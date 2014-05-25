@@ -29,10 +29,28 @@ module File_kind : sig
 
   type host
 
-  val to_code : host:host -> t -> int
-  val of_code : host:host -> int -> t option
+  val sexp_of_host : host -> Sexplib.Sexp.t
+  val host_of_sexp : Sexplib.Sexp.t -> host
+
+  val bin_size_t : t -> int
+  val bin_write_t :
+    Bin_prot.Common.buf -> pos:Bin_prot.Common.pos -> t -> Bin_prot.Common.pos
+  val bin_read_t :
+    Bin_prot.Common.buf -> pos_ref:Bin_prot.Common.pos_ref -> t
+
+  val sexp_of_t : t -> Sexplib.Sexp.t
+  val t_of_sexp : Sexplib.Sexp.t -> t
+
+  val compare : t -> t -> int
+
+  val to_code     : host:host -> t -> char
+  val of_code_exn : host:host -> char -> t
+  val of_code     : host:host -> char -> t option
 end
 
 type host = {
   file_kind : File_kind.host;
 }
+
+val sexp_of_host : host -> Sexplib.Sexp.t
+val host_of_sexp : Sexplib.Sexp.t -> host

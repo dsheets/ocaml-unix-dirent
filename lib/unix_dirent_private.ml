@@ -15,6 +15,9 @@
  *
  *)
 
+open Sexplib
+open Sexplib.Std
+
 module File_kind = struct
   type t =
   | DT_UNKNOWN
@@ -26,20 +29,21 @@ module File_kind = struct
   | DT_LNK
   | DT_SOCK
   | DT_WHT
+  with bin_io, sexp, compare
 
   type defns = {
-    dt_unknown : int;
-    dt_fifo    : int;
-    dt_chr     : int;
-    dt_dir     : int;
-    dt_blk     : int;
-    dt_reg     : int;
-    dt_lnk     : int;
-    dt_sock    : int;
-    dt_wht     : int;
-  }
+    dt_unknown : char;
+    dt_fifo    : char;
+    dt_chr     : char;
+    dt_dir     : char;
+    dt_blk     : char;
+    dt_reg     : char;
+    dt_lnk     : char;
+    dt_sock    : char;
+    dt_wht     : char;
+  } with sexp
 
-  type index = (int, t) Hashtbl.t
+  type index = (char, t) Hashtbl.t
   type host = defns * index
 
   let to_code ~host = let (defns,_) = host in Unix.(function
@@ -53,6 +57,17 @@ module File_kind = struct
     | DT_SOCK    -> defns.dt_sock
     | DT_WHT     -> defns.dt_wht
   )
+
+  let of_code_exn ~host code =
+    let (_,index) = host in
+    Hashtbl.find index code
+
+  let of_code ~host code =
+    try Some (of_code_exn ~host code)
+    with Not_found -> None
+
+  let t ~host =
+    Ctypes.(view ~read:(of_code_exn ~host) ~write:(to_code ~host) char)
 
   let index_of_defns defns =
     let open Unix in
@@ -69,12 +84,12 @@ module File_kind = struct
     replace h defns.dt_wht     DT_WHT;
     h
 
-  let of_code ~host code =
-    let (_,index) = host in
-    try Some (Hashtbl.find index code)
-    with Not_found -> None
+  let sexp_of_host (defns,_) = sexp_of_defns defns
+  let host_of_sexp s =
+    let defns = defns_of_sexp s in
+    (defns, index_of_defns defns)
 end
 
 type host = {
   file_kind : File_kind.host;
-}
+} with sexp

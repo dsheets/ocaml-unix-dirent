@@ -8,14 +8,14 @@ BIND_UNIX := 1
 
 ifeq ($(BIND_UNIX),0)
 SRC=lib/no_unix
-FLAGS=
-EXTRA_META=requires = \"\"
+FLAGS=-package ctypes -package sexplib.syntax -package comparelib.syntax -package bin_prot.syntax
+EXTRA_META=requires = \"ctypes sexplib.syntax comparelib.syntax bin_prot.syntax\"
 CSRCS=
 OBJS=
 else
 SRC=lib/unix
-FLAGS=-package ctypes.foreign
-EXTRA_META=requires = \"unix ctypes.foreign\"
+FLAGS=-package ctypes.foreign -package sexplib.syntax -package comparelib.syntax -package bin_prot.syntax
+EXTRA_META=requires = \"unix ctypes.foreign sexplib.syntax comparelib.syntax bin_prot.syntax\"
 CSRCS=$(SRC)/$(MOD_NAME)_stubs.c
 OBJS=$(BUILD)/unix/$(MOD_NAME)_stubs.o
 endif
@@ -24,12 +24,14 @@ CFLAGS=-fPIC -Wall -Wextra -Werror -std=c99
 
 build: $(BUILD) $(OBJS)
 	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME)_private.cmi \
-		-c lib/$(MOD_NAME)_private.ml
+		-syntax camlp4o $(FLAGS) -c lib/$(MOD_NAME)_private.ml
 	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME)_common.cmi \
-		-c lib/$(MOD_NAME)_common.mli
+		-syntax camlp4o $(FLAGS) -c lib/$(MOD_NAME)_common.mli
 	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME).cmi -I $(BUILD) -I lib \
-		$(FLAGS) -c $(SRC)/$(MOD_NAME).mli
+		-syntax camlp4o $(FLAGS) -c $(SRC)/$(MOD_NAME).mli
 	ocamlfind ocamlmklib -o $(BUILD)/$(MOD_NAME) -I $(BUILD) \
+		-ocamlc   "ocamlfind ocamlc -syntax camlp4o $(FLAGS)" \
+		-ocamlopt "ocamlfind ocamlopt -syntax camlp4o $(FLAGS)" \
 		$(FLAGS) lib/$(MOD_NAME)_private.ml lib/$(MOD_NAME)_common.ml \
 		$(SRC)/$(MOD_NAME).ml $(OBJS)
 
