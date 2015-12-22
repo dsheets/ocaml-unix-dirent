@@ -1,59 +1,61 @@
-.PHONY: build install uninstall reinstall clean
+.PHONY: build test install uninstall reinstall clean
 
 FINDLIB_NAME=unix-dirent
 MOD_NAME=unix_dirent
-BUILD=_build/lib
 
-BIND_UNIX := 1
+OCAML_LIB_DIR=$(shell ocamlc -where)
 
-ifeq ($(BIND_UNIX),0)
-SRC=lib/no_unix
-FLAGS=-package ctypes -package sexplib.syntax -package comparelib.syntax -package bin_prot.syntax
-EXTRA_META=requires = \"ctypes sexplib.syntax comparelib.syntax bin_prot.syntax\"
-CSRCS=
-OBJS=
-else
-SRC=lib/unix
-FLAGS=-package ctypes.foreign -package sexplib.syntax -package comparelib.syntax -package bin_prot.syntax
-EXTRA_META=requires = \"unix ctypes.foreign sexplib.syntax comparelib.syntax bin_prot.syntax\"
-CSRCS=$(SRC)/$(MOD_NAME)_stubs.c
-OBJS=$(BUILD)/unix/$(MOD_NAME)_stubs.o
+CTYPES_LIB_DIR=$(shell ocamlfind query ctypes)
+
+OCAMLBUILD=CTYPES_LIB_DIR=$(CTYPES_LIB_DIR) OCAML_LIB_DIR=$(OCAML_LIB_DIR) \
+	ocamlbuild -use-ocamlfind -classic-display
+
+WITH_UNIX=$(shell ocamlfind query ctypes unix > /dev/null 2>&1 ; echo $$?)
+
+TARGETS=.cma .cmxa
+
+PRODUCTS=$(addprefix dirent,$(TARGETS))
+
+ifeq ($(WITH_UNIX), 0)
+PRODUCTS+=$(addprefix $(MOD_NAME),$(TARGETS)) \
+          lib$(MOD_NAME)_stubs.a dll$(MOD_NAME)_stubs.so
 endif
 
-CFLAGS=-fPIC -Wall -Wextra -Werror -std=c99
+TYPES=.mli .cmi .cmti
 
-build: $(BUILD) $(OBJS)
-	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME)_private.cmi \
-		-syntax camlp4o $(FLAGS) -c lib/$(MOD_NAME)_private.ml
-	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME)_common.cmi \
-		-syntax camlp4o $(FLAGS) -c lib/$(MOD_NAME)_common.mli
-	ocamlfind ocamlc -o $(BUILD)/$(MOD_NAME).cmi -I $(BUILD) -I lib \
-		-syntax camlp4o $(FLAGS) -c $(SRC)/$(MOD_NAME).mli
-	ocamlfind ocamlmklib -o $(BUILD)/$(MOD_NAME) -I $(BUILD) \
-		-ocamlc   "ocamlfind ocamlc -syntax camlp4o $(FLAGS)" \
-		-ocamlopt "ocamlfind ocamlopt -syntax camlp4o $(FLAGS)" \
-		$(FLAGS) lib/$(MOD_NAME)_private.ml lib/$(MOD_NAME)_common.ml \
-		$(SRC)/$(MOD_NAME).ml $(OBJS)
+INSTALL:=$(addprefix dirent,$(TYPES)) \
+         $(addprefix dirent,$(TARGETS))
 
-$(BUILD):
-	mkdir -p $(BUILD)
+INSTALL:=$(addprefix _build/lib/,$(INSTALL))
 
-$(BUILD)/unix/$(MOD_NAME)_stubs.o: $(SRC)/$(MOD_NAME)_stubs.c $(BUILD)
-	mkdir -p $(BUILD)/unix
-	cc -c $(CFLAGS) -o $@ $< -I$(shell ocamlc -where)
+ifeq ($(WITH_UNIX), 0)
+INSTALL_UNIX:=$(addprefix dirent_unix,$(TYPES)) \
+              $(addprefix $(MOD_NAME),$(TARGETS))
 
-META: META.in
-	cp META.in META
-	echo $(EXTRA_META) >> META
+INSTALL_UNIX:=$(addprefix _build/unix/,$(INSTALL_UNIX))
 
-install: META
+INSTALL+=$(INSTALL_UNIX)
+endif
+
+ARCHIVES:=_build/lib/dirent.a
+
+ifeq ($(WITH_UNIX), 0)
+ARCHIVES+=_build/unix/$(MOD_NAME).a
+endif
+
+build:
+	$(OCAMLBUILD) $(PRODUCTS)
+
+test: build
+	$(OCAMLBUILD) unix_test/test.native
+	./test.native
+
+install:
 	ocamlfind install $(FINDLIB_NAME) META \
-		$(SRC)/$(MOD_NAME).mli \
-		$(BUILD)/$(MOD_NAME).cmi \
-		$(BUILD)/$(MOD_NAME).cma \
-		$(BUILD)/$(MOD_NAME).cmxa \
-		-dll $(BUILD)/dll$(MOD_NAME).so \
-		-nodll $(BUILD)/lib$(MOD_NAME).a $(BUILD)/$(MOD_NAME).a
+		$(INSTALL) \
+		-dll _build/unix/dll$(MOD_NAME)_stubs.so \
+		-nodll _build/unix/lib$(MOD_NAME)_stubs.a \
+		$(ARCHIVES)
 
 uninstall:
 	ocamlfind remove $(FINDLIB_NAME)
@@ -61,6 +63,6 @@ uninstall:
 reinstall: uninstall install
 
 clean:
-	rm -rf _build
-	bash -c "rm -f lib/$(MOD_NAME)_{common,private}.{cm?,o} META"
-	bash -c "rm -f lib/{unix,no_unix}/$(MOD_NAME).{cm?,o}"
+	ocamlbuild -clean
+	rm -f lib/dirent.cm? unix/dirent_unix.cm? \
+	      lib/dirent.o unix/dirent_unix.o

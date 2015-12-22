@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2014 David Sheets <sheets@alum.mit.edu>
+ * Copyright (c) 2015 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,37 +15,18 @@
  *
  *)
 
-module File_kind : sig
-  include module type of Unix_dirent_common.File_kind
+open Ctypes
 
-  val host : host
+let () =
+  let prefix = "caml_" in
+  let stubs_oc = open_out "unix/unix_dirent_stubs.c" in
+  let fmt = Format.formatter_of_out_channel stubs_oc in
+  Format.fprintf fmt "#include <dirent.h>@.";
+  Format.fprintf fmt "#include \"unix_dirent_util.h\"@.";
+  Cstubs.write_c fmt ~prefix (module Unix_dirent_bindings.C);
+  close_out stubs_oc;
 
-  val of_file_kind : Unix.file_kind -> t
-  val to_file_kind : t -> Unix.file_kind option
-end
-
-module Dirent : sig
-  type t = {
-    ino  : int64;
-    off  : int64;
-    kind : File_kind.t;
-    name : string;
-  }
-end
-
-type host = {
-  file_kind : File_kind.host;
-}
-val host : host
-
-val sexp_of_host : host -> Sexplib.Sexp.t
-val host_of_sexp : Sexplib.Sexp.t -> host
-
-type dir_handle = Unix.dir_handle
-val dir_handle : dir_handle Ctypes.typ
-
-val opendir : string -> dir_handle
-
-val readdir : dir_handle -> Dirent.t
-
-val closedir : dir_handle -> unit
+  let generated_oc = open_out "unix/unix_dirent_generated.ml" in
+  let fmt = Format.formatter_of_out_channel generated_oc in
+  Cstubs.write_ml fmt ~prefix (module Unix_dirent_bindings.C);
+  close_out generated_oc

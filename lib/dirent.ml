@@ -15,21 +15,17 @@
  *
  *)
 
-open Sexplib
-open Sexplib.Std
-
 module File_kind = struct
   type t =
-  | DT_UNKNOWN
-  | DT_FIFO
-  | DT_CHR
-  | DT_DIR
-  | DT_BLK
-  | DT_REG
-  | DT_LNK
-  | DT_SOCK
-  | DT_WHT
-  with bin_io, sexp, compare
+    | DT_UNKNOWN
+    | DT_FIFO
+    | DT_CHR
+    | DT_DIR
+    | DT_BLK
+    | DT_REG
+    | DT_LNK
+    | DT_SOCK
+    | DT_WHT
 
   type defns = {
     dt_unknown : char;
@@ -41,10 +37,9 @@ module File_kind = struct
     dt_lnk     : char;
     dt_sock    : char;
     dt_wht     : char;
-  } with sexp
+  }
 
   type index = (char, t) Hashtbl.t
-  type host = defns * index
 
   let to_code ~host = let (defns,_) = host in Unix.(function
     | DT_UNKNOWN -> defns.dt_unknown
@@ -66,30 +61,44 @@ module File_kind = struct
     try Some (of_code_exn ~host code)
     with Not_found -> None
 
-  let t ~host =
+  (*
+  let typ ~host =
     Ctypes.(view ~read:(of_code_exn ~host) ~write:(to_code ~host) char)
+   *)
 
-  let index_of_defns defns =
-    let open Unix in
-    let open Hashtbl in
-    let h = create 10 in
-    replace h defns.dt_unknown DT_UNKNOWN;
-    replace h defns.dt_fifo    DT_FIFO;
-    replace h defns.dt_chr     DT_CHR;
-    replace h defns.dt_dir     DT_DIR;
-    replace h defns.dt_blk     DT_BLK;
-    replace h defns.dt_reg     DT_REG;
-    replace h defns.dt_lnk     DT_LNK;
-    replace h defns.dt_sock    DT_SOCK;
-    replace h defns.dt_wht     DT_WHT;
-    h
+  module Host = struct
+    type t = defns * index
 
-  let sexp_of_host (defns,_) = sexp_of_defns defns
-  let host_of_sexp s =
-    let defns = defns_of_sexp s in
-    (defns, index_of_defns defns)
+    let index_of_defns defns =
+      let open Unix in
+      let open Hashtbl in
+      let h = create 10 in
+      replace h defns.dt_unknown DT_UNKNOWN;
+      replace h defns.dt_fifo    DT_FIFO;
+      replace h defns.dt_chr     DT_CHR;
+      replace h defns.dt_dir     DT_DIR;
+      replace h defns.dt_blk     DT_BLK;
+      replace h defns.dt_reg     DT_REG;
+      replace h defns.dt_lnk     DT_LNK;
+      replace h defns.dt_sock    DT_SOCK;
+      replace h defns.dt_wht     DT_WHT;
+      h
+
+    let of_defns defns = (defns, index_of_defns defns)
+
+  end
 end
 
-type host = {
-  file_kind : File_kind.host;
-} with sexp
+module Dirent = struct
+  type t = {
+    ino  : int64;
+    kind : File_kind.t;
+    name : string;
+  }
+end
+
+module Host = struct
+  type t = {
+    file_kind : File_kind.Host.t;
+  }
+end

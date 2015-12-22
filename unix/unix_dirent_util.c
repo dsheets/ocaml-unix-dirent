@@ -1,4 +1,4 @@
-(*
+/*
  * Copyright (c) 2014 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -13,6 +13,32 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- *)
+ */
 
-include Unix_dirent_common
+#include <dirent.h>
+#include <caml/alloc.h>
+#include <caml/threads.h>
+
+DIR *unix_dirent_opendir(const char *name) {
+  DIR *retval;
+  caml_release_runtime_system();
+  retval = opendir(name);
+  caml_acquire_runtime_system();
+  return retval;
+}
+
+struct dirent *unix_dirent_readdir(DIR *dirp) {
+  struct dirent *retval;
+  caml_release_runtime_system();
+  retval = readdir(dirp);
+  caml_acquire_runtime_system();
+  return retval;
+}
+
+int unix_dirent_closedir(DIR *dirp) {
+  int retval;
+  caml_release_runtime_system();
+  retval = closedir(dirp);
+  caml_acquire_runtime_system();
+  return retval;
+}

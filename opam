@@ -1,0 +1,28 @@
+opam-version: "1.2"
+name: "unix-dirent"
+version: "0.3.0"
+maintainer: "sheets@alum.mit.edu"
+authors: "David Sheets"
+homepage: "https://github.com/dsheets/ocaml-unix-dirent"
+bug-reports: "https://github.com/dsheets/ocaml-unix-dirent/issues"
+dev-repo: "https://github.com/dsheets/ocaml-unix-dirent.git"
+license: "ISC"
+build: [
+  [make "build"]
+]
+install: [
+  [make "install"]
+]
+remove: [make "uninstall"]
+depends: [
+  "ocamlfind" {build}
+  "alcotest" {test}
+  "base-bytes"
+]
+depopts: [
+  "unix"
+  "ctypes"
+]
+conflicts: [
+  "ctypes" {< "0.4.0"}
+]

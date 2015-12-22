@@ -1,0 +1,17 @@
+version = "0.3.0"
+description = "Unix dirent types, maps, and support"
+requires = "bytes"
+archive(byte) = "dirent.cma"
+archive(bytes, plugin) = "dirent.cma"
+archive(native) = "dirent.cmxa"
+archive(native, plugin) = "dirent.cmxs"
+exists_if = "dirent.cma"
+
+package "unix" (
+  requires = "unix ctypes.stubs unix-dirent unix-errno.unix"
+  archive(byte) = "unix_dirent.cma"
+  archive(bytes, plugin) = "unix_dirent.cma"
+  archive(native) = "unix_dirent.cmxa"
+  archive(native, plugin) = "unix_dirent.cmxs"
+  exists_if = "unix_dirent.cma"
+)

@@ -1,4 +1,4 @@
-(*
+/*
  * Copyright (c) 2014 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -13,6 +13,12 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- *)
+ */
 
-include module type of Unix_dirent_common
+#include <dirent.h>
+
+DIR *unix_dirent_opendir(const char *name);
+
+struct dirent *unix_dirent_readdir(DIR *dirp);
+
+int unix_dirent_closedir(DIR *dirp);

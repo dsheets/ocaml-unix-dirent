@@ -27,30 +27,39 @@ module File_kind : sig
   | DT_SOCK
   | DT_WHT
 
-  type host
+  type defns = {
+    dt_unknown : char;
+    dt_fifo    : char;
+    dt_chr     : char;
+    dt_dir     : char;
+    dt_blk     : char;
+    dt_reg     : char;
+    dt_lnk     : char;
+    dt_sock    : char;
+    dt_wht     : char;
+  }
 
-  val sexp_of_host : host -> Sexplib.Sexp.t
-  val host_of_sexp : Sexplib.Sexp.t -> host
+  module Host : sig
+    type t
 
-  val bin_size_t : t -> int
-  val bin_write_t :
-    Bin_prot.Common.buf -> pos:Bin_prot.Common.pos -> t -> Bin_prot.Common.pos
-  val bin_read_t :
-    Bin_prot.Common.buf -> pos_ref:Bin_prot.Common.pos_ref -> t
+    val of_defns : defns -> t
+  end
 
-  val sexp_of_t : t -> Sexplib.Sexp.t
-  val t_of_sexp : Sexplib.Sexp.t -> t
-
-  val compare : t -> t -> int
-
-  val to_code     : host:host -> t -> char
-  val of_code_exn : host:host -> char -> t
-  val of_code     : host:host -> char -> t option
+  val to_code     : host:Host.t -> t -> char
+  val of_code_exn : host:Host.t -> char -> t
+  val of_code     : host:Host.t -> char -> t option
 end
 
-type host = {
-  file_kind : File_kind.host;
-}
+module Dirent : sig
+  type t = {
+    ino  : int64;
+    kind : File_kind.t;
+    name : string;
+  }
+end
 
-val sexp_of_host : host -> Sexplib.Sexp.t
-val host_of_sexp : Sexplib.Sexp.t -> host
+module Host : sig
+  type t = {
+    file_kind : File_kind.Host.t;
+  }
+end
