@@ -31,7 +31,7 @@ let dir_handle = Ctypes.(
       (Obj.obj dh : Unix.dir_handle)
     )
     ~write:(fun dir ->
-      let addr = Nativeint.zero in
+      let addr = Nativeint.of_string "0" in
       Obj.(set_field (repr addr) 1 (field (repr dir) 0));
       ptr_of_raw_address addr
     )
