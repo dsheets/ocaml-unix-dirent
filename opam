@@ -21,6 +21,7 @@ depends: [
 ]
 depopts: [
   "unix"
+  "unix-type-representations"
   "ctypes"
 ]
 conflicts: [

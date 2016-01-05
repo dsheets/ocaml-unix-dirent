@@ -1,3 +1,4 @@
 <*.{ml,mli}>: package(bytes), package(ctypes.stubs), package(unix-errno.unix)
+<*.{ml,mli}>: package(unix-type-representations)
 <unix_dirent_stubs.c>: use_ctypes, use_dirent_util
 <*.{cma,cmxa}>: use_dirent_stubs

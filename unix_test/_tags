@@ -1,1 +1,2 @@
 <*.*>: package(alcotest), package(ctypes), package(unix-errno.unix), use_dirent_stubs
+<*.*>: package(unix-type-representations)
