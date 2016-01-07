@@ -20,7 +20,7 @@ depends: [
   "base-bytes"
 ]
 depopts: [
-  "unix"
+  "base-unix"
   "unix-type-representations"
   "ctypes"
 ]
