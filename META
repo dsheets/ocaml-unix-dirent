@@ -8,7 +8,7 @@ archive(native, plugin) = "dirent.cmxs"
 exists_if = "dirent.cma"
 
 package "unix" (
-  requires = "unix ctypes.stubs unix-dirent unix-errno.unix"
+  requires = "unix unix-type-representations ctypes.stubs unix-dirent unix-errno.unix"
   archive(byte) = "unix_dirent.cma"
   archive(bytes, plugin) = "unix_dirent.cma"
   archive(native) = "unix_dirent.cmxa"

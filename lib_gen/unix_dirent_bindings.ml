@@ -21,20 +21,14 @@ module Types = Unix_dirent_types.C(Unix_dirent_types_detected)
 
 let dirent = Types.Dirent.t
 
-(* TODO: review *)
 let dir_handle = Ctypes.(
   view
     ~read:(fun ptr ->
-      let addr = raw_address_of_ptr ptr in
-      let dh = Obj.(new_block abstract_tag 1) in
-      Obj.(set_field dh 0 (field (repr addr) 1));
-      (Obj.obj dh : Unix.dir_handle)
-    )
+        Unix_representations.dir_handle_of_nativeint
+          (raw_address_of_ptr ptr))
     ~write:(fun dir ->
-      let addr = Nativeint.zero in
-      Obj.(set_field (repr addr) 1 (field (repr dir) 0));
-      ptr_of_raw_address addr
-    )
+        ptr_of_raw_address
+          (Unix_representations.nativeint_of_dir_handle dir))
     (ptr void))
 
 module C(F: Cstubs.FOREIGN) = struct

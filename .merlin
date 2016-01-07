@@ -2,6 +2,7 @@ PKG ctypes
 PKG result
 PKG alcotest
 PKG unix-errno.unix
+PKG unix-type-representations
 
 S lib
 S lib_gen
