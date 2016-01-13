@@ -15,7 +15,7 @@ WITH_UNIX=$(shell ocamlfind query ctypes unix unix-type-representations \
 
 TARGETS=.cma .cmxa
 
-PRODUCTS=$(addprefix dirent,$(TARGETS))
+PRODUCTS:=$(addprefix dirent,$(TARGETS))
 
 ifeq ($(WITH_UNIX), 0)
 PRODUCTS+=$(addprefix $(MOD_NAME),$(TARGETS)) \
@@ -34,6 +34,9 @@ INSTALL_UNIX:=$(addprefix dirent_unix,$(TYPES)) \
               $(addprefix $(MOD_NAME),$(TARGETS))
 
 INSTALL_UNIX:=$(addprefix _build/unix/,$(INSTALL_UNIX))
+INSTALL_UNIX:=$(INSTALL_UNIX) \
+	      -dll _build/unix/dll$(MOD_NAME)_stubs.so \
+	      -nodll _build/unix/lib$(MOD_NAME)_stubs.a
 
 INSTALL+=$(INSTALL_UNIX)
 endif
@@ -54,8 +57,6 @@ test: build
 install:
 	ocamlfind install $(FINDLIB_NAME) META \
 		$(INSTALL) \
-		-dll _build/unix/dll$(MOD_NAME)_stubs.so \
-		-nodll _build/unix/lib$(MOD_NAME)_stubs.a \
 		$(ARCHIVES)
 
 uninstall:
