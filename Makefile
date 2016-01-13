@@ -10,8 +10,9 @@ CTYPES_LIB_DIR=$(shell ocamlfind query ctypes)
 OCAMLBUILD=CTYPES_LIB_DIR=$(CTYPES_LIB_DIR) OCAML_LIB_DIR=$(OCAML_LIB_DIR) \
 	ocamlbuild -use-ocamlfind -classic-display
 
-WITH_UNIX=$(shell ocamlfind query ctypes unix unix-type-representations \
-              > /dev/null 2>&1 ; echo $$?)
+WITH_UNIX=$(shell ocamlfind query \
+            ctypes unix unix-type-representations unix-errno.unix \
+            > /dev/null 2>&1 ; echo $$?)
 
 TARGETS=.cma .cmxa
 

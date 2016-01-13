@@ -23,6 +23,7 @@ depopts: [
   "base-unix"
   "unix-type-representations"
   "ctypes"
+  "unix-errno"
 ]
 conflicts: [
   "ctypes" {< "0.4.0"}
