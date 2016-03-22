@@ -16,3 +16,5 @@
  *)
 
 val opendir : string -> Lwt_unix.dir_handle Lwt.t
+
+val closedir : Unix.dir_handle -> unit Lwt.t

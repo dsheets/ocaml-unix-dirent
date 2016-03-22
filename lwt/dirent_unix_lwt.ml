@@ -18,3 +18,6 @@
 let opendir = Lwt_unix.opendir
 (* TODO: better errno handling *)
 
+let closedir = Lwt_unix.closedir
+(* TODO: better errno handling *)
+
