@@ -15,3 +15,12 @@ package "unix" (
   archive(native, plugin) = "unix_dirent.cmxs"
   exists_if = "unix_dirent.cma"
 )
+
+package "lwt" (
+  requires = "threads unix-dirent.unix lwt.preemptive"
+  archive(byte) = "unix_dirent_lwt.cma"
+  archive(byte, plugin) = "unix_dirent_lwt.cma"
+  archive(native) = "unix_dirent_lwt.cmxa"
+  archive(native, plugin) = "unix_dirent_lwt.cmxs"
+  exists_if = "unix_dirent_lwt.cma"
+)

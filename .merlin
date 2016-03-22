@@ -1,4 +1,5 @@
 PKG ctypes
+PKG lwt
 PKG result
 PKG alcotest
 PKG unix-errno.unix

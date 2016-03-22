@@ -4,3 +4,4 @@ true: principal, bin_annot, safe_string, strict_sequence
 "lib": include
 "unix": include
 "src": include
+"lwt": include
