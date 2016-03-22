@@ -14,3 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *)
+
+let opendir = Lwt_unix.opendir
+(* TODO: better errno handling *)
+

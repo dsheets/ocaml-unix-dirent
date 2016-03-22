@@ -14,3 +14,5 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *)
+
+val opendir : string -> Lwt_unix.dir_handle Lwt.t
