@@ -17,4 +17,6 @@
 
 val opendir : string -> Lwt_unix.dir_handle Lwt.t
 
+val readdir : Unix.dir_handle -> Dirent.Dirent.t Lwt.t
+
 val closedir : Unix.dir_handle -> unit Lwt.t
