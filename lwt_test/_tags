@@ -1,0 +1,3 @@
+<*.*>: package(alcotest), package(ctypes), package(unix-errno.unix), use_dirent_stubs
+<*.*>: package(unix-type-representations), package(lwt.unix)
+<*.*>: use_dirent_stubs, use_dirent_lwt_stubs

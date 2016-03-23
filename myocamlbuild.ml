@@ -80,5 +80,11 @@ dispatch begin
     dep ["ocaml"; "link"; "native"; "program"; "use_dirent_stubs"]
       ["unix/libunix_dirent_stubs"-.-(!Options.ext_lib)];
 
+    flag ["ocaml"; "link"; "byte"; "program"; "use_dirent_lwt_stubs"] &
+      S[A"-dllib"; A"-lunix_lwt_dirent_stubs"];
+    dep ["ocaml"; "link"; "native"; "program"; "use_dirent_lwt_stubs"]
+      ["lwt/libunix_dirent_lwt_stubs"-.-(!Options.ext_lib)];
+
+
   | _ -> ()
 end;;

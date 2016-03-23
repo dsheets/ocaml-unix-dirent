@@ -78,6 +78,8 @@ build:
 	$(OCAMLBUILD) $(PRODUCTS)
 
 test: build
+	$(OCAMLBUILD) lwt_test/lwt_test.native
+	./lwt_test.native
 
 
 install:
