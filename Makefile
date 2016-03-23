@@ -52,8 +52,7 @@ build:
 	$(OCAMLBUILD) $(PRODUCTS)
 
 test: build
-	$(OCAMLBUILD) unix_test/test.native
-	./test.native
+
 
 install:
 	ocamlfind install $(FINDLIB_NAME) META \
