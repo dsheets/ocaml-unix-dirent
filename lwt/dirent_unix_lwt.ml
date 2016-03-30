@@ -15,11 +15,23 @@
  *
  *)
 
-let opendir = Lwt_unix.opendir
-(* TODO: better errno handling *)
+let opendir path = Lwt.catch
+    (fun () -> Lwt_unix.opendir path)
+    (function
+      | Unix.Unix_error (err, call, label) ->
+        let errno = Errno_unix.(of_unix ~host) err in
+        Lwt.fail Errno.(Error { errno; call; label; })
+      | exn -> Lwt.fail exn
+    )
 
-let closedir = Lwt_unix.closedir
-(* TODO: better errno handling *)
+let closedir dh = Lwt.catch
+    (fun () -> Lwt_unix.closedir dh)
+    (function
+      | Unix.Unix_error (err, call, label) ->
+        let errno = Errno_unix.(of_unix ~host) err in
+        Lwt.fail Errno.(Error { errno; call; label; })
+      | exn -> Lwt.fail exn
+    )
 
 let raise_errno_error ~call errno ~label =
   let error_list = Errno.of_code ~host:Errno_unix.host errno in
