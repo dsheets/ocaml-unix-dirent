@@ -78,6 +78,8 @@ build:
 	$(OCAMLBUILD) $(PRODUCTS)
 
 test: build
+	$(OCAMLBUILD) unix_test/test.native
+	./test.native
 	$(OCAMLBUILD) lwt_test/lwt_test.native
 	./lwt_test.native
 
