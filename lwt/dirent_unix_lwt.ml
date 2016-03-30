@@ -38,9 +38,9 @@ let raise_errno_error ~call errno ~label =
   Lwt.fail Errno.(Error { errno = error_list; call; label })
 
 type readdir_result =
-   Error of int * string
- | Next of int64 * char * string
- | End_of_stream
+  | Error of int * string
+  | Next of int64 * char * string
+  | End_of_stream
 
 external make_readdir_job : nativeint -> readdir_result Lwt_unix.job =
    "unix_dirent_lwt_readdir_job"
@@ -49,13 +49,13 @@ let readdir handle =
   let open Lwt in
   let nhandle = Unix_representations.nativeint_of_dir_handle handle in
   Lwt_unix.run_job (make_readdir_job nhandle) >>= function
-    End_of_stream -> Lwt.fail End_of_file
-  | Error (errno, call) -> raise_errno_error errno
-       ~call ~label:(Nativeint.to_string nhandle)
+  | End_of_stream -> Lwt.fail End_of_file
+  | Error (errno, call) ->
+    raise_errno_error errno ~call ~label:(Nativeint.to_string nhandle)
   | Next (ino, kind, name) ->
     let localhost = Dirent_unix.File_kind.host in
     let file_kind = match Dirent.File_kind.of_code localhost kind with
-     | Some file_kind -> file_kind
-     | None -> Dirent.File_kind.DT_UNKNOWN
+      | Some file_kind -> file_kind
+      | None -> Dirent.File_kind.DT_UNKNOWN
     in
-      Lwt.return (Dirent.Dirent.{ ino; kind = file_kind; name })
+    Lwt.return (Dirent.Dirent.{ ino; kind = file_kind; name })
