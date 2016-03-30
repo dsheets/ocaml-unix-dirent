@@ -17,7 +17,9 @@ OCAMLBUILD=CTYPES_LIB_DIR=$(CTYPES_LIB_DIR) \
 WITH_UNIX=$(shell ocamlfind query \
             ctypes unix unix-type-representations unix-errno.unix \
             > /dev/null 2>&1 ; echo $$?)
-WITH_LWT=$(shell ocamlfind query lwt unix > /dev/null 2>&1 ; echo $$?)
+WITH_LWT=$(shell ocamlfind query \
+            lwt ctypes unix unix-type-representations unix-errno.unix \
+            > /dev/null 2>&1 ; echo $$?)
 
 TARGETS=.cma .cmxa
 
