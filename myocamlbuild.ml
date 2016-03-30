@@ -64,8 +64,6 @@ dispatch begin
     flag ["ocaml"; "link"; "byte"; "library"; "use_dirent_stubs"] &
       S[A"-dllib"; A"-lunix_dirent_stubs"];
 
-    dep ["ocaml"; "link"; "native"; "library"; "use_dirent_stubs"]
-      ["unix/libunix_dirent_stubs"-.-(!Options.ext_lib)];
     flag ["ocaml"; "link"; "native"; "library"; "use_dirent_stubs"] &
       S[A"-cclib"; A"-lunix_dirent_stubs"];
 
