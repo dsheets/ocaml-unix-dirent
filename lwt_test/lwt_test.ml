@@ -26,11 +26,26 @@ struct
     Pervasives.compare (lkind, lname) (rkind, rname)
 end
 
-module Dirent_set = Set.Make(Ordered_dirent)
+module Dirent_set = struct
+  include Set.Make(Ordered_dirent)
+
+  let pp_dirent fmt dirent =
+    let open Dirent.Dirent in
+    (* inodes elided as above *)
+    Format.fprintf fmt "{kind=%s; name=%s}"
+      (Dirent.File_kind.to_string dirent.kind)
+      dirent.name
+
+  let pp fmt set =
+    Format.pp_print_newline fmt ();
+    Format.pp_print_list pp_dirent fmt (elements set)
+end
+
+let dirent_set =
+  (module Dirent_set : Alcotest.TESTABLE with type t = Dirent_set.t)
 
 (* Retrieve all the dirents in a particular directory *) 
-let read_all : string -> Dirent_set.t Lwt.t =
-  fun dirname ->
+let read_all : string -> Dirent_set.t Lwt.t = fun dirname ->
   let open Lwt in
   Dirent_unix_lwt.opendir dirname >>= fun dir ->
   let rec loop items =
@@ -41,7 +56,12 @@ let read_all : string -> Dirent_set.t Lwt.t =
       `Exception End_of_file -> return items
     | `Exception e -> Lwt.fail e
     | `Value item -> loop (Dirent_set.add item items)
-  in loop Dirent_set.empty
+  in
+  loop Dirent_set.empty
+  >>= fun set ->
+  Dirent_unix_lwt.closedir dir
+  >>= fun () ->
+  Lwt.return set
 
 module Readdir = struct
   let test_dir = "lwt_test/test-directory"
@@ -56,10 +76,9 @@ module Readdir = struct
        {ino=0L; kind=File_kind.DT_DIR; name="subdirectory"};
        {ino=0L; kind=File_kind.DT_REG; name="regular-file"};
      ] in
-     assert
-       (Dirent_set.equal 
-          expected
-          (Lwt_unix.run (read_all test_dir)))
+     Alcotest.check dirent_set "readdir sets"
+       expected
+       (Lwt_unix.run (read_all test_dir))
 
   let tests = [
     "readdir",     `Quick, readdir_test;
