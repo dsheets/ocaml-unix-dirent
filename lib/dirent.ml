@@ -61,6 +61,17 @@ module File_kind = struct
     try Some (of_code_exn ~host code)
     with Not_found -> None
 
+  let to_string = function
+    | DT_UNKNOWN -> "DT_UNKNOWN"
+    | DT_FIFO    -> "DT_FIFO"
+    | DT_CHR     -> "DT_CHR"
+    | DT_DIR     -> "DT_DIR"
+    | DT_BLK     -> "DT_BLK"
+    | DT_REG     -> "DT_REG"
+    | DT_LNK     -> "DT_LNK"
+    | DT_SOCK    -> "DT_SOCK"
+    | DT_WHT     -> "DT_WHT"
+
   (*
   let typ ~host =
     Ctypes.(view ~read:(of_code_exn ~host) ~write:(to_code ~host) char)

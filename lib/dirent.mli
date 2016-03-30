@@ -48,6 +48,8 @@ module File_kind : sig
   val to_code     : host:Host.t -> t -> char
   val of_code_exn : host:Host.t -> char -> t
   val of_code     : host:Host.t -> char -> t option
+
+  val to_string : t -> string
 end
 
 module Dirent : sig
