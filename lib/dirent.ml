@@ -96,7 +96,7 @@ module File_kind = struct
       h
 
     let of_defns defns = (defns, index_of_defns defns)
-
+    let to_defns (defns, _) = defns
   end
 end
 
