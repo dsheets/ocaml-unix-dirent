@@ -43,6 +43,7 @@ module File_kind : sig
     type t
 
     val of_defns : defns -> t
+    val to_defns : t -> defns
   end
 
   val to_code     : host:Host.t -> t -> char
@@ -50,6 +51,7 @@ module File_kind : sig
   val of_code     : host:Host.t -> char -> t option
 
   val to_string : t -> string
+  val of_string : string -> t option
 end
 
 module Dirent : sig

@@ -72,7 +72,18 @@ module File_kind = struct
     | DT_SOCK    -> "DT_SOCK"
     | DT_WHT     -> "DT_WHT"
 
-  (*
+  let of_string = function
+    | "DT_UNKNOWN" -> Some DT_UNKNOWN
+    | "DT_FIFO"    -> Some DT_FIFO
+    | "DT_CHR"     -> Some DT_CHR
+    | "DT_DIR"     -> Some DT_DIR
+    | "DT_BLK"     -> Some DT_BLK
+    | "DT_REG"     -> Some DT_REG
+    | "DT_LNK"     -> Some DT_LNK
+    | "DT_SOCK"    -> Some DT_SOCK
+    | "DT_WHT"     -> Some DT_WHT
+    | _            -> None
+ (*
   let typ ~host =
     Ctypes.(view ~read:(of_code_exn ~host) ~write:(to_code ~host) char)
    *)
@@ -96,7 +107,7 @@ module File_kind = struct
       h
 
     let of_defns defns = (defns, index_of_defns defns)
-
+    let to_defns (defns, _) = defns
   end
 end
 
