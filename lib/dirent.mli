@@ -51,6 +51,7 @@ module File_kind : sig
   val of_code     : host:Host.t -> char -> t option
 
   val to_string : t -> string
+  val of_string : string -> t option
 end
 
 module Dirent : sig
