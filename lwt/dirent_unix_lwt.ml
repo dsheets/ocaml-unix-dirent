@@ -17,25 +17,11 @@
 
 let opendir path = Lwt.catch
     (fun () -> Lwt_unix.opendir path)
-    (function
-      | Unix.Unix_error (err, call, label) ->
-        let errno = Errno_unix.(of_unix ~host) err in
-        Lwt.fail Errno.(Error { errno; call; label; })
-      | exn -> Lwt.fail exn
-    )
+    (fun exn -> Lwt.fail (Errno_unix.to_errno_exn exn))
 
 let closedir dh = Lwt.catch
     (fun () -> Lwt_unix.closedir dh)
-    (function
-      | Unix.Unix_error (err, call, label) ->
-        let errno = Errno_unix.(of_unix ~host) err in
-        Lwt.fail Errno.(Error { errno; call; label; })
-      | exn -> Lwt.fail exn
-    )
-
-let raise_errno_error ~call errno ~label =
-  let error_list = Errno.of_code ~host:Errno_unix.host errno in
-  Lwt.fail Errno.(Error { errno = error_list; call; label })
+    (fun exn -> Lwt.fail (Errno_unix.to_errno_exn exn))
 
 type readdir_result =
   | Error of int * string
@@ -51,7 +37,7 @@ let readdir handle =
   Lwt_unix.run_job (make_readdir_job nhandle) >>= function
   | End_of_stream -> Lwt.fail End_of_file
   | Error (errno, call) ->
-    raise_errno_error errno ~call ~label:(Nativeint.to_string nhandle)
+    Errno_unix.raise_errno ~call ~label:(Nativeint.to_string nhandle) errno
   | Next (ino, kind, name) ->
     let localhost = Dirent_unix.File_kind.host in
     let file_kind = match Dirent.File_kind.of_code localhost kind with

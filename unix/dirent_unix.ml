@@ -41,10 +41,13 @@ let opendir name =
   )
 
 let readdir dirh =
-  match Errno_unix.raise_on_errno ~call:"readdir" (fun () ->
-    C.readdir dirh
-  ) with
-  | None -> raise End_of_file
+  Errno_unix.reset_errno ();
+  match C.readdir (Some dirh) with
+  | None ->
+    let errno = Errno_unix.get_errno () in
+    if errno = 0
+    then raise End_of_file
+    else Errno_unix.raise_errno ~call:"readdir" errno
   | Some t ->
     let open Ctypes in
     let open Unsigned in
@@ -64,7 +67,7 @@ let readdir dirh =
 
 let closedir dirh =
   Errno_unix.raise_on_errno ~call:"closedir" (fun () ->
-    ignore (C.closedir dirh)
+    match C.closedir (Some dirh) with 0 -> Some () | _ -> None
   )
 
 let host = { Dirent.Host.file_kind = File_kind.host }
