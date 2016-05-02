@@ -23,13 +23,19 @@ let dirent = Types.Dirent.t
 
 let dir_handle = Ctypes.(
   view
-    ~read:(fun ptr ->
-        Unix_representations.dir_handle_of_nativeint
-          (raw_address_of_ptr ptr))
-    ~write:(fun dir ->
-        ptr_of_raw_address
-          (Unix_representations.nativeint_of_dir_handle dir))
-    (ptr void))
+    ~read:(function
+      | Some ptr ->
+        Some (Unix_representations.dir_handle_of_nativeint
+                (raw_address_of_ptr ptr))
+      | None -> None
+    )
+    ~write:(function
+      | Some dir ->
+        Some (ptr_of_raw_address
+                (Unix_representations.nativeint_of_dir_handle dir))
+      | None -> None
+    )
+    (ptr_opt void))
 
 module C(F: Cstubs.FOREIGN) = struct
 
