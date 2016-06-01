@@ -43,8 +43,12 @@ dispatch begin
       ~prods:["unix/%_stubs.c"; "unix/%_generated.ml"]
       ~deps: ["lib_gen/%_bindgen.byte"]
       (fun env build ->
-        Cmd (A(env "lib_gen/%_bindgen.byte")));
-
+         Cmd (S[A(env "lib_gen/%_bindgen.byte");
+                A"--c-file";
+                A(env "unix/%_stubs.c");
+                A"--ml-file";
+                A(env "unix/%_generated.ml")]));
+ 
     copy_rule "cstubs: lib_gen/x_bindings.ml -> unix/x_bindings.ml"
       "lib_gen/%_bindings.ml" "unix/%_bindings.ml";
 
