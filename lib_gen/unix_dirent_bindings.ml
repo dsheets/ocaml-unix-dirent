@@ -40,12 +40,12 @@ let dir_handle = Ctypes.(
 module C(F: Cstubs.FOREIGN) = struct
 
   let opendir =
-    F.(foreign "unix_dirent_opendir" (string @-> returning dir_handle))
+    F.(foreign "opendir" (string @-> returning dir_handle))
 
   let readdir =
-    F.(foreign "unix_dirent_readdir" (dir_handle @-> returning (ptr_opt dirent)))
+    F.(foreign "readdir" (dir_handle @-> returning (ptr_opt dirent)))
 
   let closedir =
-    F.(foreign "unix_dirent_closedir" (dir_handle @-> returning int))
+    F.(foreign "closedir" (dir_handle @-> returning int))
 
 end

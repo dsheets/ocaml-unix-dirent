@@ -15,6 +15,9 @@
  *
  *)
 
+module Generated = Unix_dirent_lwt_generated
+module C = Unix_dirent_bindings.C(Generated)
+
 let opendir path = Lwt.catch
     (fun () -> Lwt_unix.opendir path)
     (fun exn -> Lwt.fail (Errno_unix.to_errno_exn exn))
