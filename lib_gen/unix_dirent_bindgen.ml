@@ -31,21 +31,24 @@ type configuration = {
   errno: Cstubs.errno_policy;
   concurrency: Cstubs.concurrency_policy;
   headers: string;
-  bindings: (module Cstubs.BINDINGS)
+  bindings: (module Cstubs.BINDINGS);
+  prefix: string;
 }
 
 let standard_configuration = {
   errno = Cstubs.ignore_errno;
   concurrency = Cstubs.sequential;
   headers = "#include <dirent.h>\n#include \"unix_dirent_util.h\"";
-  bindings = (module Prefixed_bindings)
+  bindings = (module Prefixed_bindings);
+  prefix = "unix_dirent_";
 }
 
 let lwt_configuration = {
   errno = Cstubs.return_errno;
   concurrency = Cstubs.lwt_jobs;
   headers = "#include <dirent.h>\n";
-  bindings = (module Unix_dirent_bindings.C)
+  bindings = (module Unix_dirent_bindings.C);
+  prefix = "unix_dirent_lwt_";
 }
 
 let configuration = ref standard_configuration
@@ -63,8 +66,7 @@ let () =
   let () = Arg.parse argspec failwith "" in
   if !ml_file = "" || !c_file = "" then
     failwith "Both --ml-file and --c-file arguments must be supplied";
-  let {errno; concurrency; headers; bindings} = !configuration in
-  let prefix = "unix_dirent_" in
+  let {errno; concurrency; headers; bindings; prefix} = !configuration in
   let stubs_oc = open_out !c_file in
   let fmt = Format.formatter_of_out_channel stubs_oc in
   Format.fprintf fmt "%s@." headers;
