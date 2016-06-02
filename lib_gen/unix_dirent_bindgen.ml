@@ -36,7 +36,7 @@ type configuration = {
 }
 
 let standard_configuration = {
-  errno = Cstubs.ignore_errno;
+  errno = Cstubs.return_errno;
   concurrency = Cstubs.sequential;
   headers = "#include <dirent.h>\n#include \"unix_dirent_util.h\"";
   bindings = (module Prefixed_bindings);
