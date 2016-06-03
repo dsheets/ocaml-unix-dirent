@@ -15,33 +15,41 @@
  *
  *)
 
-let opendir path = Lwt.catch
-    (fun () -> Lwt_unix.opendir path)
-    (fun exn -> Lwt.fail (Errno_unix.to_errno_exn exn))
+module Generated = Unix_dirent_lwt_generated
+module C = Unix_dirent_bindings.C(Generated)
+module Type = Unix_dirent_types.C(Unix_dirent_types_detected)
+open Lwt.Infix
 
-let closedir dh = Lwt.catch
-    (fun () -> Lwt_unix.closedir dh)
-    (fun exn -> Lwt.fail (Errno_unix.to_errno_exn exn))
+let lwt_raise_errno_error ~call ~label code =
+  Lwt.fail Errno.(Error { errno = of_code ~host:Errno_unix.host code; call; label; })
 
-type readdir_result =
-  | Error of int * string
-  | Next of int64 * char * string
-  | End_of_stream
-
-external make_readdir_job : nativeint -> readdir_result Lwt_unix.job =
-   "unix_dirent_lwt_readdir_job"
+let kind_of_code kind_code =
+  match Dirent.File_kind.of_code ~host:Dirent_unix.File_kind.host kind_code with
+  | None -> Dirent.File_kind.DT_UNKNOWN
+  | Some kind -> kind
 
 let readdir handle =
-  let open Lwt in
-  let nhandle = Unix_representations.nativeint_of_dir_handle handle in
-  Lwt_unix.run_job (make_readdir_job nhandle) >>= function
-  | End_of_stream -> Lwt.fail End_of_file
-  | Error (errno, call) ->
-    Errno_unix.raise_errno ~call ~label:(Nativeint.to_string nhandle) errno
-  | Next (ino, kind, name) ->
-    let localhost = Dirent_unix.File_kind.host in
-    let file_kind = match Dirent.File_kind.of_code localhost kind with
-      | Some file_kind -> file_kind
-      | None -> Dirent.File_kind.DT_UNKNOWN
-    in
-    Lwt.return (Dirent.Dirent.{ ino; kind = file_kind; name })
+  (C.readdir (Some handle)).Generated.lwt >>= function
+    None, 0 -> Lwt.fail End_of_file
+  | None, errno -> lwt_raise_errno_error ~call:"readdir" errno
+                     ~label:(Nativeint.to_string
+                               (Unix_representations.nativeint_of_dir_handle handle))
+  | Some t, _ -> let open Ctypes in
+    Lwt.return 
+      Dirent.Dirent.{
+        ino = Unsigned.UInt64.to_int64 (getf (!@ t) Type.Dirent.ino);
+        kind = kind_of_code (char_of_int (Unsigned.UChar.to_int (getf (!@ t) Type.Dirent.type_)));
+        name = coerce (ptr char) string (CArray.start (getf (!@ t) Type.Dirent.name));
+      }
+
+let closedir handle =
+  (C.closedir (Some handle)).Generated.lwt >>= function
+    0, _ -> Lwt.return_unit
+  | _, errno -> lwt_raise_errno_error ~call:"closedir" errno
+                  ~label:(Nativeint.to_string
+                            (Unix_representations.nativeint_of_dir_handle handle))
+
+let opendir path =
+  (C.opendir path).Generated.lwt >>= function
+    None, errno -> lwt_raise_errno_error ~call:"opendir" ~label:path errno
+  | Some handle, _ -> Lwt.return handle

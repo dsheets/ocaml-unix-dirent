@@ -36,19 +36,15 @@ module File_kind = struct
 end
 
 let opendir name =
-  Errno_unix.raise_on_errno ~call:"opendir" ~label:name (fun () ->
-    C.opendir name
-  )
+  match C.opendir name with
+    Some h, _ -> h
+  | _, errno -> Errno_unix.raise_errno ~call:"closedir" errno
 
 let readdir dirh =
-  Errno_unix.reset_errno ();
   match C.readdir (Some dirh) with
-  | None ->
-    let errno = Errno_unix.get_errno () in
-    if errno = 0
-    then raise End_of_file
-    else Errno_unix.raise_errno ~call:"readdir" errno
-  | Some t ->
+  | None, 0 -> raise End_of_file
+  | None, errno -> Errno_unix.raise_errno ~call:"readdir" errno
+  | Some t, _ ->
     let open Ctypes in
     let open Unsigned in
     let ent = !@ t in
@@ -66,8 +62,8 @@ let readdir dirh =
     }))
 
 let closedir dirh =
-  Errno_unix.raise_on_errno ~call:"closedir" (fun () ->
-    match C.closedir (Some dirh) with 0 -> Some () | _ -> None
-  )
+  match C.closedir (Some dirh) with
+    0, _ -> ()
+  | _, errno -> Errno_unix.raise_errno ~call:"closedir" errno
 
 let host = { Dirent.Host.file_kind = File_kind.host }
