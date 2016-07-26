@@ -30,7 +30,7 @@ let kind_of_code kind_code =
 
 let readdir handle =
   (C.readdir (Some handle)).Generated.lwt >>= function
-    None, 0 -> Lwt.fail End_of_file
+    None, errno when errno = Signed.SInt.zero -> Lwt.fail End_of_file
   | None, errno -> lwt_raise_errno_error ~call:"readdir" errno
                      ~label:(Nativeint.to_string
                                (Unix_representations.nativeint_of_dir_handle handle))

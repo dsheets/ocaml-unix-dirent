@@ -42,7 +42,7 @@ let opendir name =
 
 let readdir dirh =
   match C.readdir (Some dirh) with
-  | None, 0 -> raise End_of_file
+  | None, errno when errno = Signed.SInt.zero -> raise End_of_file
   | None, errno -> Errno_unix.raise_errno ~call:"readdir" errno
   | Some t, _ ->
     let open Ctypes in
