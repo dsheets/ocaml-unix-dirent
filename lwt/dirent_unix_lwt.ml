@@ -21,10 +21,12 @@ module Type = Unix_dirent_types.C(Unix_dirent_types_detected)
 open Lwt.Infix
 
 let lwt_raise_errno_error ~call ~label code =
-  Lwt.fail Errno.(Error { errno = of_code ~host:Errno_unix.host code; call; label; })
+  let host = Errno_unix.host in
+  Lwt.fail Errno.(Error { errno = of_code ~host code; call; label; })
 
 let kind_of_code kind_code =
-  match Dirent.File_kind.of_code ~host:Dirent_unix.File_kind.host kind_code with
+  let host = Dirent_unix.File_kind.host in
+  match Dirent.File_kind.of_code ~host kind_code with
   | None -> Dirent.File_kind.DT_UNKNOWN
   | Some kind -> kind
 
@@ -55,9 +57,10 @@ let readdir handle =
 let closedir handle =
   (C.closedir (Some handle)).Generated.lwt >>= function
     0, _ -> Lwt.return_unit
-  | _, errno -> lwt_raise_errno_error ~call:"closedir" errno
-                  ~label:(Nativeint.to_string
-                            (Unix_representations.nativeint_of_dir_handle handle))
+  | _, errno ->
+    lwt_raise_errno_error ~call:"closedir" errno
+      ~label:(Nativeint.to_string
+                (Unix_representations.nativeint_of_dir_handle handle))
 
 let opendir path =
   (C.opendir path).Generated.lwt >>= function
