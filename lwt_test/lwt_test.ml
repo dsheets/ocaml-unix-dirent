@@ -50,8 +50,15 @@ let read_all : string -> Dirent_set.t Lwt.t = fun dirname ->
   Dirent_unix_lwt.opendir dirname >>= fun dir ->
   let rec loop items =
     Lwt.catch
-      (fun () -> Dirent_unix_lwt.readdir dir >>= fun ent ->
-                 return (`Value ent))
+      (fun () ->
+         Lwt.catch (fun () ->
+           Lwt_unix.openfile "does_not_exist" [] 0
+           >>= fun _ ->
+           Lwt.return_unit
+         ) (fun _ -> Lwt.return_unit)
+         >>= fun () ->
+         Dirent_unix_lwt.readdir dir >>= fun ent ->
+         return (`Value ent))
       (fun exn -> return (`Exception exn)) >>= function
       `Exception End_of_file -> return items
     | `Exception e -> Lwt.fail e
