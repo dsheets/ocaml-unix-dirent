@@ -1,4 +1,4 @@
-version = "0.3.3"
+version = "0.3.4"
 description = "Unix dirent types, maps, and support"
 requires = "bytes"
 archive(byte) = "dirent.cma"

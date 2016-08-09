@@ -1,3 +1,6 @@
+0.3.4 (2016-08-08):
+* Work-around bug ocamllabs/ocaml-ctypes#426 for readdir errno handling
+
 0.3.3 (2016-08-03):
 * Use the ctypes Lwt support to replace hand-written Lwt jobs code
 * Use the ctypes errno support for errno handling
