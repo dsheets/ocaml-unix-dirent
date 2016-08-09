@@ -45,6 +45,11 @@ module C(F: Cstubs.FOREIGN) = struct
   let readdir =
     F.(foreign "readdir" (dir_handle @-> returning (ptr_opt dirent)))
 
+  let readdir_r =
+    F.(foreign "readdir_r"
+         (dir_handle @-> ptr dirent @-> ptr (ptr_opt dirent)
+          @-> returning int))
+
   let closedir =
     F.(foreign "closedir" (dir_handle @-> returning int))
 
