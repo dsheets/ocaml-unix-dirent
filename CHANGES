@@ -1,3 +1,6 @@
+0.3.5 (2017-01-20):
+* Install cmx files
+
 0.3.4 (2016-08-08):
 * Work-around bug ocamllabs/ocaml-ctypes#426 for readdir errno handling
 
